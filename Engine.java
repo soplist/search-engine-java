@@ -82,7 +82,7 @@ public class Engine {
 		return hrefList;
 	}
 
-	public List<String> getContentInDoubleQuotationMarks_1(List<String> hrefList){
+	public List<String> getContentInDoubleQuotationMarks_g1_1(List<String> hrefList){
 		List<String> contents = new ArrayList<String>();
 		
 		for (String href : hrefList) {
@@ -94,7 +94,7 @@ public class Engine {
 		return contents;
 	}
 	
-	public List<String> getDomain_2(List<String> contents){
+	public List<String> getDomain_g1_2(List<String> contents){
 		List<String> domainList = new ArrayList<String>();
 		
 		for (String content : contents) {
@@ -119,12 +119,42 @@ public class Engine {
 					}
 				}
 				if(!exit){
-				    domainList.add(d);
+				    domainList.add(d.trim());
 				}
 			}
 		}
 		
 		return domainList;
+	}
+	
+	public List<String> getDomain_g1_3(List<String> OldDomainList){
+		List<String> newDomainList = new ArrayList<String>();
+		
+		for (String domian : OldDomainList) {
+			Pattern p = Pattern.compile("http://www.([^<>\"]*)"); 
+			Matcher m = p.matcher(domian);
+	        boolean flg = m.matches(); 
+	        if(flg){
+	        	newDomainList.add(domian);
+	        }
+		}
+		
+		return newDomainList;
+	}
+	
+	public List<String> integration_g1(List<String> hrefs){
+		List<String> contents = getContentInDoubleQuotationMarks_g1_1(hrefs);
+		//for (String content : contents) {
+			//System.out.println(content);
+		//}
+		List<String> domainList = getDomain_g1_2(contents);
+		//System.out.println("list size:"+domainList.size());
+		//for (String domian : domainList) {
+			//System.out.println(domian);
+		//}
+		List<String> newDomainList = getDomain_g1_3(domainList);
+		
+		return newDomainList;
 	}
 	/**
 	 * @param args
@@ -138,11 +168,7 @@ public class Engine {
 		//for (String href : hrefs) {
 			//System.out.println(href);
 		//}
-		List<String> contents = engine.getContentInDoubleQuotationMarks_1(hrefs);
-		//for (String content : contents) {
-			//System.out.println(content);
-		//}
-		List<String> domainList = engine.getDomain_2(contents);
+		List<String> domainList = engine.integration_g1(hrefs);
 		System.out.println("list size:"+domainList.size());
 		for (String domian : domainList) {
 			System.out.println(domian);
