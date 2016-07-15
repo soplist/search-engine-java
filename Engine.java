@@ -8,9 +8,15 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 public class Engine {
+	
+	private String[] domains = {".com",".net",".org",".gov",".edu",".link",".red",".int",".mil",".pub"};
 	
 	public String getContent(String strUrl, String httpMethod) {  
         
@@ -64,7 +70,62 @@ public class Engine {
 		    e.printStackTrace();
 		}
 	}
+	
+	public List<String> extract(String data){
+		List<String> hrefList = new ArrayList<String>();
+		//Pattern pattern = Pattern.compile("<a\\s+[^<>]*\\s+href=\"([^<>\"]*)\"[^<>]*>");
+		Pattern pattern = Pattern.compile("href=\"([^<>\"]*)\"");
+		Matcher matcher = pattern.matcher(data);
+		while(matcher.find()){
+			hrefList.add(matcher.group(0));
+        }
+		return hrefList;
+	}
 
+	public List<String> getContentInDoubleQuotationMarks_1(List<String> hrefList){
+		List<String> contents = new ArrayList<String>();
+		
+		for (String href : hrefList) {
+			int firstQuotationMarkIndex = href.indexOf("\"");
+			int lastQuotationMarkIndex = href.lastIndexOf("\"");
+			contents.add(href.substring(firstQuotationMarkIndex+1,lastQuotationMarkIndex));
+		}
+		
+		return contents;
+	}
+	
+	public List<String> getDomain_2(List<String> contents){
+		List<String> domainList = new ArrayList<String>();
+		
+		for (String content : contents) {
+			boolean domainAvailable = false;
+			String currentDomain = "";
+			
+			for (String domain : domains) {
+				if(content.contains(domain)){
+					domainAvailable = true;
+					currentDomain = domain;
+					break;
+				}
+			}
+			
+			if(domainAvailable){
+				String d = content.substring(0, content.indexOf(currentDomain)+currentDomain.length());
+				boolean exit = false;
+				for (String domain : domainList) {
+					if(domain.equals(d)){
+						exit = true;
+						break;
+					}
+				}
+				if(!exit){
+				    domainList.add(d);
+				}
+			}
+		}
+		
+		return domainList;
+	}
 	/**
 	 * @param args
 	 */
@@ -72,7 +133,20 @@ public class Engine {
 		// TODO Auto-generated method stub
 		Engine engine = new Engine();
 		String data = engine.getContent("https://www.hao123.com", "post");
-		engine.writeFile(data,"D:\\wangkang\\html.txt");
+		//engine.writeFile(data,"D:\\wangkang\\html.txt");
+		List<String> hrefs = engine.extract(data);
+		//for (String href : hrefs) {
+			//System.out.println(href);
+		//}
+		List<String> contents = engine.getContentInDoubleQuotationMarks_1(hrefs);
+		//for (String content : contents) {
+			//System.out.println(content);
+		//}
+		List<String> domainList = engine.getDomain_2(contents);
+		System.out.println("list size:"+domainList.size());
+		for (String domian : domainList) {
+			System.out.println(domian);
+		}
 	}
 
 }
